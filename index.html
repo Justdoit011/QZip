@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Zip File List Test</title>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="Zip.js"></script>
+    <script type="text/javascript" src="TestCase.js"></script>
+    <script type="text/javascript">
+        var txt = null;     //text area dom element
+        var current = 0;    //current processing zip file index
+        var fileList = null;//selected file list
+
+        //click "List" button
+        function List() {
+            try
+            {
+                var fileInput = document.getElementById("file-input");
+                if (fileInput.files.length == 0) throw new Error("Please select a zip file.");
+
+                txt.value = "";
+                TestMyZip(fileInput.files);
+            }
+            catch (e) {
+                alert(e);
+            }
+        }
+
+        //simple print the entries in zip file
+        function ParseMyZip(file) {
+            var zip = new ZipFile(file, function (entries) {
+                txt.value = PrintEntries(entries);
+            }, function (e) {
+                alert(e);
+            });
+        }
+
+        //process multiple zip file with test case
+        function TestMyZip(files) {
+            fileList = files;
+            current = 0;
+            NextZip();          //test zip files
+            //GetTestCase();    //print out test cases from zip files
+        }
+
+        //test next zip file
+        function NextZip() {
+            if (!fileList || current >= fileList.length) return;
+            var file = fileList[current++];
+            if (!file) return;
+            txt.value += "Name: " + file.name + ", Size: " + file.size;
+
+            var zip = new QZip.ZipFile(file, function (entries) {
+                //print zip entries
+
+                if (typeof (TestCase) == 'undefined' || !TestCase || typeof (TestCase[zip.name]) == 'undefined') {
+                    //list zip file content
+                    txt.value += ", List: \r\n" + PrintEntries(zip.files) + "\r\n\r\n";
+                }
+                else {
+                    //run test case
+                    txt.value += ", Test: " + TestZip(zip) + "\r\n";
+                }
+
+                setTimeout(NextZip, 100);
+            }, function (e) {
+                txt.value += "\r\n----- Exception: " + e + " -----\r\n\r\n";
+
+                setTimeout(NextZip, 100);
+            });
+        }
+
+        //Test a single zip file
+        function TestZip(zip) {
+            var test = TestCase[zip.name];
+            if (test.length != zip.files.length)
+                return GetTestMsg("number of files not expected.", test.length, zip.files.length);
+
+            for (var i = 0; i < test.length; i++) {
+                var expected = test[i];
+                var actual = zip.files[i];
+
+                if (expected[0] != actual.fileName) return GetTestMsg("Test " + i + " file name not match.", expected[0], actual.fileName);
+                if (expected[1] != actual.uncompressedSize) return GetTestMsg("Test " + i + " file size not match at " + actual.fileName + ".", expected[1], actual.uncompressedSize);
+            }
+
+            return "Pass";
+        }
+
+        function GetTestMsg(reason, expected, actual) {
+            return "Failed\r\n----- Reason: " + reason + "-----\r\n----- Expected: " + expected + "-----\r\n----- Actual: " + actual + " -----\r\n";
+        }
+
+        function PrintEntries(entries) {
+            var buffer = new Array(entries.length);
+            for (var i = 0; i < buffer.length; i++) {
+                buffer[i] = "" + entries[i].fileName + ", " + entries[i].uncompressedSize;
+            }
+
+            return buffer.join(",\r\n");
+        }
+
+        function GetTestCase() {
+            if (!fileList || current >= fileList.length) return;
+            var file = fileList[current++];
+            if (!file) return;
+
+            var zip = new QZip.ZipFile(file, function (entries) {
+                //print zip entries
+                txt.value += "TestCase['" + zip.name + "'] = ";
+
+                //list zip file content
+                var buffer = new Array(entries.length);
+                for (var i = 0; i < buffer.length; i++) {
+                    buffer[i] = "    ['" + entries[i].fileName + "', " + entries[i].uncompressedSize + "]";
+                }
+
+                txt.value += "[\r\n" + buffer.join(",\r\n") + "\r\n];\r\n";
+
+                setTimeout(NextZip, 100);
+            }, function (e) {
+                txt.value += "\r\n----- Exception: " + e + " -----\r\n";
+
+                setTimeout(NextZip, 100);
+            });
+        }
+
+
+        //page on load
+        function init() {
+            var dropArea = document.getElementById("txtResult");
+            dropArea.addEventListener("drop", dropHandler, false);
+            dropArea.addEventListener("dragover", doNothing, false);
+
+            txt = document.getElementById("txtResult");
+        }
+
+        function dropHandler(event) {
+            // Use our doNothing() function to prevent default processing. 
+            doNothing(event);
+            // Get the file(s) that are dropped.
+            var fileInput = event.dataTransfer.files;
+            if (!fileInput) return;  // if null, exit now
+            var filecount = fileInput.length;  // get number of dropped files
+
+            if (filecount > 0) {
+                // Do something with the files.
+                txt.value = "";
+                //ParseMyZip(fileInput[0]);
+                TestMyZip(fileInput);
+            }
+        }
+
+        // Prevents the event from continuing so our handlers can process the event.
+        function doNothing(event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    </script>
+</head>
+<body onload="init()">
+    <p>
+        <label>
+            <span class="form-label">Choose a zip file</span>
+            <input type="file" accept="application/zip" id="file-input" multiple="multiple" />
+        </label>
+        <input type="button" value="List" onclick="List()" />
+        <input type="button" value="Clear" onclick="document.getElementById('txtResult').value=''" />
+    </p>
+
+    <textarea cols="70" rows="20" id="txtResult" readonly="readonly">Drag and drop zip file(s) here</textarea>
+</body>
+</html>
