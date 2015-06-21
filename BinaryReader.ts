@@ -3,7 +3,7 @@ module QZip {
     export module Internal {
         /* Port from JSZip https://github.com/Stuk/jszip
          * lib/dataReader.js, lib/uint8ArrayReader.js
-         *
+         * MIT license or the GPLv3
          */
         export class BinaryReader {
             length: number;             //length of data buffer

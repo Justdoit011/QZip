@@ -4,7 +4,7 @@ var QZip;
     (function (Internal) {
         /* Port from JSZip https://github.com/Stuk/jszip
          * lib/dataReader.js, lib/uint8ArrayReader.js
-         *
+         * MIT license or the GPLv3
          */
         var BinaryReader = (function () {
             function BinaryReader(data, offset) {
@@ -302,6 +302,15 @@ var QZip;
     })(Internal = QZip.Internal || (QZip.Internal = {}));
 })(QZip || (QZip = {}));
 /// <reference path="ZipEntry.ts" />
+/*****************************************************
+ * QZip v1.0
+ * A JavaScript util to list all entries in Zip file.
+ * Support Zip and Zip64. HTML5 browser required.
+ * usage:
+ * var zip = new QZip.ZipFile(file,
+ *              function (entries) { success callback },
+ *              function (err) { error callback });
+ *****************************************************/
 var QZip;
 (function (QZip) {
     var ZipFile = (function () {

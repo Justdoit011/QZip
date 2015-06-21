@@ -1,5 +1,14 @@
 ﻿/// <reference path="ZipEntry.ts" />
 
+/*****************************************************
+ * QZip v1.0
+ * A JavaScript util to list all entries in Zip file.
+ * Support Zip and Zip64. HTML5 browser required.
+ * usage:
+ * var zip = new QZip.ZipFile(file, 
+ *              function (entries) { success callback },
+ *              function (err) { error callback });
+ *****************************************************/
 module QZip {
     export class ZipFile {
         static EOCDR_MIN: number = 22;      //22 Byte
