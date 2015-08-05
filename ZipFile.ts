@@ -35,7 +35,7 @@ module QZip {
 
         private SeekEndOfCentral(): void {
             //read partial file into memory buffer
-            var reader = new FileReader();
+            var reader = this.createReader();
 
             var start: number = this.file.size - ZipFile.EOCDR_BUF;
             if (start < 0) start = 0;
@@ -56,11 +56,11 @@ module QZip {
                 self.onerror(ZipFile.ERR_READ + "EOCDR I/O Error " + error);
             };
 
-            reader.readAsArrayBuffer(this.file.slice(start));
+            this.openReader(reader, this.file.slice(start));
         }
 
         private SeekCentral(): void {
-            var reader = new FileReader();
+            var reader = this.createReader();
 
             var start: number = this.centralDirOffset;
             if (this.file.size - start > ZipFile.CDR_MAX)
@@ -82,12 +82,12 @@ module QZip {
                 self.onerror(ZipFile.ERR_READ + "CDR I/O Error " + error);
             };
 
-            reader.readAsArrayBuffer(this.file.slice(start));
+            this.openReader(reader, this.file.slice(start));
         }
 
         //Try to find EOCDR in the buffer. Return false if not found
-        private CheckEndOfCentral(array: ArrayBuffer, start: number): boolean {
-            this.reader = new Internal.BinaryReader(new Uint8Array(array), start);
+        private CheckEndOfCentral(array: any, start: number): boolean {
+            this.reader = Internal.BinaryReader.CreateReader(array, start);
             var offset = this.reader.lastIndexOfSignature(ZipFile.CENTRAL_DIRECTORY_END, this.reader.length - ZipFile.EOCDR_MIN, this.reader.length - ZipFile.EOCDR_MAX);
             if (offset === -1) return false;
 
@@ -182,9 +182,9 @@ module QZip {
         /**
          * Read the central directory.
          */
-        private readCentralDir(array: ArrayBuffer, start: number): void {
+        private readCentralDir(array: any, start: number): void {
             if (this.reader) this.reader.dispose();
-            this.reader = new Internal.BinaryReader(new Uint8Array(array), start);
+            this.reader = Internal.BinaryReader.CreateReader(array, start);
 
             ZipFile.writeLog("Read central dir.");
             while (this.reader.readString(4) === ZipFile.CENTRAL_FILE_HEADER) {
@@ -206,6 +206,25 @@ module QZip {
             if (signature !== expectedSignature) {
                 throw new Error("Corrupted zip or bug : unexpected signature " + "(" + signature + ", expected " + expectedSignature + ")");
             }
+        }
+
+        /**
+         * Create file reader based on browser capacity
+         */
+        private createReader(): any {
+            if (typeof (FileReader) === "function") return new FileReader();
+            else throw new Error("Your browser does not have FileReader.");
+        }
+
+        /**
+         * Open file reader based on browser capacity
+         */
+        private openReader(reader: any, file: any) {
+            if (typeof (reader.readAsArrayBuffer) === "function") {
+                if (typeof (file.getSource) === "function") file = file.getSource();    //convert moxie file to original html5 file
+                reader.readAsArrayBuffer(file);
+            }
+            else throw new Error("Your browser does not support reading binary file.");
         }
 
         constructor(file: File, onload: Function, onerror: Function) {

@@ -16,22 +16,12 @@ var QZip;
 (function (QZip) {
     var Internal;
     (function (Internal) {
-        /* Binary Reader: read Uint8Array with a cursor
-         * Port from JSZip https://github.com/Stuk/jszip
-         * lib/dataReader.js, lib/uint8ArrayReader.js
-         * MIT license or the GPLv3
+        /* Binary Reader: read binary data with a cursor
+         * base class, cannot be initialized directly
+         * usage: var reader = Internal.BinaryReader.CreateReader(array, offset);
          */
         var BinaryReader = (function () {
-            function BinaryReader(data, offset) {
-                if (!data)
-                    throw new Error("Array buffer is empty.");
-                this.index = 0;
-                this.length = data.length;
-                this.data = data;
-                if (offset && offset > 0)
-                    this.offset = offset;
-                else
-                    this.offset = 0;
+            function BinaryReader() {
             }
             /**
              * Get the byte at the specified index.
@@ -39,7 +29,7 @@ var QZip;
              * @return {number} a byte.
              */
             BinaryReader.prototype.byteAt = function (i) {
-                return this.data[i];
+                throw new Error("byteAt is not implemented.");
             };
             /**
              * Check that the offset will not go too far.
@@ -96,7 +86,7 @@ var QZip;
                 QZip.ZipFile.writeLog("Search signature: " + lowerBound + " to " + upperBound);
                 var sig0 = sig.charCodeAt(0), sig1 = sig.charCodeAt(1), sig2 = sig.charCodeAt(2), sig3 = sig.charCodeAt(3);
                 for (var i = upperBound; i >= lowerBound; --i) {
-                    if (this.data[i] === sig0 && this.data[i + 1] === sig1 && this.data[i + 2] === sig2 && this.data[i + 3] === sig3) {
+                    if (this.byteAt(i) === sig0 && this.byteAt(i + 1) === sig1 && this.byteAt(i + 2) === sig2 && this.byteAt(i + 3) === sig3) {
                         QZip.ZipFile.writeLog("Signature found in " + (upperBound - i + 1) + " try.");
                         return i;
                     }
@@ -109,13 +99,7 @@ var QZip;
              * @return {number} the corresponding number.
              */
             BinaryReader.prototype.readInt = function (size) {
-                var result = 0, i;
-                this.checkOffset(size);
-                for (i = this.index + size - 1; i >= this.index; i--) {
-                    result = (result << 8) + this.byteAt(i);
-                }
-                this.index += size;
-                return result >>> 0; //convert signed int to unsigned
+                throw new Error("readInt is not implemented.");
             };
             BinaryReader.prototype.readInt64 = function () {
                 var lower = this.readInt(4);
@@ -130,11 +114,7 @@ var QZip;
              * @return {string} the corresponding string.
              */
             BinaryReader.prototype.readString = function (size) {
-                if (size === 0)
-                    return "";
-                var result = this.arrayLikeToString(this.data, this.index, this.index + size);
-                this.index += size;
-                return result;
+                throw new Error("readString is not implemented.");
             };
             /**
              * Get the next date.
@@ -144,6 +124,87 @@ var QZip;
                 var dostime = this.readInt(4);
                 return new Date(((dostime >> 25) & 0x7f) + 1980, ((dostime >> 21) & 0x0f) - 1, (dostime >> 16) & 0x1f, (dostime >> 11) & 0x1f, (dostime >> 5) & 0x3f, (dostime & 0x1f) << 1); // second
             };
+            BinaryReader.prototype.dispose = function () { };
+            /**
+             * Create proper binary reader instance based on data type
+             * @return {BinaryReader} the reader instance.
+             */
+            BinaryReader.CreateReader = function (data, offset) {
+                if (data instanceof ArrayBuffer) {
+                    return new Internal.Uint8ArrayReader(new Uint8Array(data), offset);
+                }
+                throw new Error("Unsupported binary reader type.");
+            };
+            BinaryReader.MAX_VALUE_32BITS = 0xFFFFFFFF;
+            return BinaryReader;
+        })();
+        Internal.BinaryReader = BinaryReader;
+    })(Internal = QZip.Internal || (QZip.Internal = {}));
+})(QZip || (QZip = {}));
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+/// <reference path="BinaryReader.ts" />
+var QZip;
+(function (QZip) {
+    var Internal;
+    (function (Internal) {
+        /* Binary Reader: read Uint8Array with a cursor
+         * Port from JSZip https://github.com/Stuk/jszip
+         * lib/dataReader.js, lib/uint8ArrayReader.js
+         * MIT license or the GPLv3
+         */
+        var Uint8ArrayReader = (function (_super) {
+            __extends(Uint8ArrayReader, _super);
+            function Uint8ArrayReader(data, offset) {
+                _super.call(this);
+                if (!data)
+                    throw new Error("Array buffer is empty.");
+                this.index = 0;
+                this.length = data.length;
+                this.data = data;
+                if (offset && offset > 0)
+                    this.offset = offset;
+                else
+                    this.offset = 0;
+            }
+            /**
+             * Get the byte at the specified index.
+             * @param {number} i the index to use.
+             * @return {number} a byte.
+             */
+            Uint8ArrayReader.prototype.byteAt = function (i) {
+                return this.data[i];
+            };
+            /**
+             * Get the next number with a given byte size.
+             * @param {number} size the number of bytes to read.
+             * @return {number} the corresponding number.
+             */
+            Uint8ArrayReader.prototype.readInt = function (size) {
+                var result = 0, i;
+                this.checkOffset(size);
+                for (i = this.index + size - 1; i >= this.index; i--) {
+                    result = (result << 8) + this.byteAt(i);
+                }
+                this.index += size;
+                return result >>> 0; //convert signed int to unsigned
+            };
+            /**
+             * Get the next string with a given byte size.
+             * @param {number} size the number of bytes to read.
+             * @return {string} the corresponding string.
+             */
+            Uint8ArrayReader.prototype.readString = function (size) {
+                if (size === 0)
+                    return "";
+                var result = this.arrayLikeToString(this.data, this.index, this.index + size);
+                this.index += size;
+                return result;
+            };
             /** utils.js
              * Transform an array-like object to a string.
              * @param {Uint8Array} array the array to transform.
@@ -151,7 +212,7 @@ var QZip;
              * @param {upperLimit} upper bound index of this array. <
              * @return {String} the result.
              */
-            BinaryReader.prototype.arrayLikeToString = function (array, lowerLimit, upperLimit) {
+            Uint8ArrayReader.prototype.arrayLikeToString = function (array, lowerLimit, upperLimit) {
                 // Performances notes :
                 // --------------------
                 // String.fromCharCode.apply(null, array) is the fastest, see
@@ -189,14 +250,13 @@ var QZip;
                 }
                 return result.join("");
             };
-            BinaryReader.prototype.dispose = function () {
+            Uint8ArrayReader.prototype.dispose = function () {
                 if (this.data)
                     this.data = null;
             };
-            BinaryReader.MAX_VALUE_32BITS = 0xFFFFFFFF;
-            return BinaryReader;
-        })();
-        Internal.BinaryReader = BinaryReader;
+            return Uint8ArrayReader;
+        })(Internal.BinaryReader);
+        Internal.Uint8ArrayReader = Uint8ArrayReader;
     })(Internal = QZip.Internal || (QZip.Internal = {}));
 })(QZip || (QZip = {}));
 /// <reference path="BinaryReader.ts" />
@@ -351,7 +411,7 @@ var QZip;
         }
         ZipFile.prototype.SeekEndOfCentral = function () {
             //read partial file into memory buffer
-            var reader = new FileReader();
+            var reader = this.createReader();
             var start = this.file.size - ZipFile.EOCDR_BUF;
             if (start < 0)
                 start = 0;
@@ -370,10 +430,10 @@ var QZip;
             reader.onerror = function (error) {
                 self.onerror(ZipFile.ERR_READ + "EOCDR I/O Error " + error);
             };
-            reader.readAsArrayBuffer(this.file.slice(start));
+            this.openReader(reader, this.file.slice(start));
         };
         ZipFile.prototype.SeekCentral = function () {
-            var reader = new FileReader();
+            var reader = this.createReader();
             var start = this.centralDirOffset;
             if (this.file.size - start > ZipFile.CDR_MAX)
                 throw new Error("There are too many entries in zip file than supported. Please reduce your zip file size.");
@@ -390,11 +450,11 @@ var QZip;
             reader.onerror = function (error) {
                 self.onerror(ZipFile.ERR_READ + "CDR I/O Error " + error);
             };
-            reader.readAsArrayBuffer(this.file.slice(start));
+            this.openReader(reader, this.file.slice(start));
         };
         //Try to find EOCDR in the buffer. Return false if not found
         ZipFile.prototype.CheckEndOfCentral = function (array, start) {
-            this.reader = new QZip.Internal.BinaryReader(new Uint8Array(array), start);
+            this.reader = QZip.Internal.BinaryReader.CreateReader(array, start);
             var offset = this.reader.lastIndexOfSignature(ZipFile.CENTRAL_DIRECTORY_END, this.reader.length - ZipFile.EOCDR_MIN, this.reader.length - ZipFile.EOCDR_MAX);
             if (offset === -1)
                 return false;
@@ -480,7 +540,7 @@ var QZip;
         ZipFile.prototype.readCentralDir = function (array, start) {
             if (this.reader)
                 this.reader.dispose();
-            this.reader = new QZip.Internal.BinaryReader(new Uint8Array(array), start);
+            this.reader = QZip.Internal.BinaryReader.CreateReader(array, start);
             ZipFile.writeLog("Read central dir.");
             while (this.reader.readString(4) === ZipFile.CENTRAL_FILE_HEADER) {
                 var file = new QZip.Internal.ZipEntry(this.reader, this.zip64);
@@ -501,6 +561,27 @@ var QZip;
             if (signature !== expectedSignature) {
                 throw new Error("Corrupted zip or bug : unexpected signature " + "(" + signature + ", expected " + expectedSignature + ")");
             }
+        };
+        /**
+         * Create file reader based on browser capacity
+         */
+        ZipFile.prototype.createReader = function () {
+            if (typeof (FileReader) === "function")
+                return new FileReader();
+            else
+                throw new Error("Your browser does not have FileReader.");
+        };
+        /**
+         * Open file reader based on browser capacity
+         */
+        ZipFile.prototype.openReader = function (reader, file) {
+            if (typeof (reader.readAsArrayBuffer) === "function") {
+                if (typeof (file.getSource) === "function")
+                    file = file.getSource(); //convert moxie file to original html5 file
+                reader.readAsArrayBuffer(file);
+            }
+            else
+                throw new Error("Your browser does not support reading binary file.");
         };
         //Print log if debug flag is true
         ZipFile.writeLog = function (msg) {

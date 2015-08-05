@@ -15,16 +15,15 @@
 module QZip {
 
     export module Internal {
-        /* Binary Reader: read Uint8Array with a cursor
-         * Port from JSZip https://github.com/Stuk/jszip
-         * lib/dataReader.js, lib/uint8ArrayReader.js
-         * MIT license or the GPLv3
+        /* Binary Reader: read binary data with a cursor
+         * base class, cannot be initialized directly
+         * usage: var reader = Internal.BinaryReader.CreateReader(array, offset);
          */
         export class BinaryReader {
             length: number;             //length of data buffer
-            private index: number;      //current index
-            private offset: number;     //global offset, the data buffer begins at which byte on the whole file
-            private data: Uint8Array;   //data buffer
+            protected index: number;    //current index
+            protected offset: number;   //global offset, the data buffer begins at which byte on the whole file
+            
 
             static MAX_VALUE_32BITS: number = 0xFFFFFFFF;
 
@@ -33,8 +32,8 @@ module QZip {
              * @param {number} i the index to use.
              * @return {number} a byte.
              */
-            private byteAt(i: number): number {
-                return this.data[i];
+            protected byteAt(i: number): number {
+                throw new Error("byteAt is not implemented.");
             }
 
             /**
@@ -42,7 +41,7 @@ module QZip {
              * @param {string} offset the additional offset to check.
              * @throws {Error} an Error if the offset is out of bounds.
              */
-            private checkOffset(offset: number): void {
+            protected checkOffset(offset: number): void {
                 this.checkIndex(this.index + offset);
             }
 
@@ -51,7 +50,7 @@ module QZip {
              * @param {string} newIndex the index to check.
              * @throws {Error} an Error if the index is out of bounds.
              */
-            private checkIndex(newIndex: number): void {
+            protected checkIndex(newIndex: number): void {
                 if (this.length < newIndex || newIndex < 0) {
                     throw new Error("End of data reached (data length = " + this.length + ", asked index = " + (newIndex) + "). Corrupted zip ?");
                 }
@@ -97,7 +96,7 @@ module QZip {
                     sig2 = sig.charCodeAt(2),
                     sig3 = sig.charCodeAt(3);
                 for (var i = upperBound; i >= lowerBound; --i) {
-                    if (this.data[i] === sig0 && this.data[i + 1] === sig1 && this.data[i + 2] === sig2 && this.data[i + 3] === sig3) {
+                    if (this.byteAt(i) === sig0 && this.byteAt(i + 1) === sig1 && this.byteAt(i + 2) === sig2 && this.byteAt(i + 3) === sig3) {
                         ZipFile.writeLog("Signature found in " + (upperBound - i + 1) + " try.");
                         return i;
                     }
@@ -112,14 +111,7 @@ module QZip {
              * @return {number} the corresponding number.
              */
             readInt(size: number): number {
-                var result = 0,
-                    i;
-                this.checkOffset(size);
-                for (i = this.index + size - 1; i >= this.index; i--) {
-                    result = (result << 8) + this.byteAt(i);
-                }
-                this.index += size;
-                return result >>> 0;    //convert signed int to unsigned
+                throw new Error("readInt is not implemented.");
             }
 
             readInt64(): number {
@@ -136,11 +128,7 @@ module QZip {
              * @return {string} the corresponding string.
              */
             readString(size: number): string {
-                if (size === 0) return "";
-
-                var result = this.arrayLikeToString(this.data, this.index, this.index + size);
-                this.index += size;
-                return result;
+                throw new Error("readString is not implemented.");
             }
 
             /**
@@ -158,67 +146,20 @@ module QZip {
                     (dostime & 0x1f) << 1); // second
             }
 
-            constructor(data: Uint8Array, offset?: number) {
-                if (!data) throw new Error("Array buffer is empty.");
-                this.index = 0;
-                this.length = data.length;
-                this.data = data;
-                if (offset && offset > 0) this.offset = offset;
-                else this.offset = 0;
-            }
+            constructor() { }
 
-            /** utils.js
-             * Transform an array-like object to a string.
-             * @param {Uint8Array} array the array to transform.
-             * @param {lowerLimit} lower bound index of this array. >=
-             * @param {upperLimit} upper bound index of this array. <
-             * @return {String} the result.
+            dispose(): void { }
+
+            /**
+             * Create proper binary reader instance based on data type
+             * @return {BinaryReader} the reader instance.
              */
-            private arrayLikeToString(array: Uint8Array, lowerLimit: number, upperLimit: number): string {
-                // Performances notes :
-                // --------------------
-                // String.fromCharCode.apply(null, array) is the fastest, see
-                // see http://jsperf.com/converting-a-uint8array-to-a-string/2
-                // but the stack is limited (and we can get huge arrays !).
-                //
-                // result += String.fromCharCode(array[i]); generate too many strings !
-                //
-                // This code is inspired by http://jsperf.com/arraybuffer-to-string-apply-performance/2
-                var chunk = 65536;
-                var result = [],
-                    len = upperLimit,
-                    type = "uint8array",
-                    k = lowerLimit,
-                    canUseApply = true;
-                try {
-                    String.fromCharCode.apply(null, new Uint8Array(0));
-                } catch (e) {
-                    canUseApply = false;
+            static CreateReader(data: any, offset: number) {
+                if (data instanceof ArrayBuffer) {
+                    return new Uint8ArrayReader(new Uint8Array(data), offset);
                 }
 
-                // no apply : slow and painful algorithm
-                // default browser on android 4.*
-                if (!canUseApply) {
-                    var resultStr = "";
-                    for (var i = k; i < len; i++) {
-                        resultStr += String.fromCharCode(array[i]);
-                    }
-                    return resultStr;
-                }
-                while (k < len && chunk > 1) {
-                    try {
-                        result.push(String.fromCharCode.apply(null, array.subarray(k, Math.min(k + chunk, len))));
-                        k += chunk;
-                    }
-                    catch (e) {
-                        chunk = Math.floor(chunk / 2);
-                    }
-                }
-                return result.join("");
-            }
-
-            dispose(): void {
-                if (this.data) this.data = null;
+                throw new Error("Unsupported binary reader type.");
             }
         }
     }
