@@ -3,6 +3,10 @@
 module QZip {
 
     export module Internal {
+        /* ZipEntry: parse and read a entry from zip file
+         * Dependence: BinaryReader
+         *
+         */
         export class ZipEntry {
             zip64: boolean = false;
             date: Date;

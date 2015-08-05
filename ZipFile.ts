@@ -1,6 +1,10 @@
 ﻿/// <reference path="ZipEntry.ts" />
 
 module QZip {
+
+    /* ZipFile class: the only external class, main entrance of QZip
+     *   parse and read zip file
+     */
     export class ZipFile {
         static EOCDR_MIN: number = 22;      //22 Byte
         static EOCDR_MAX: number = 65558;   //64 KB comment max + 22 B EOCDR
