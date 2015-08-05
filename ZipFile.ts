@@ -53,10 +53,10 @@ module QZip {
                 }
             };
             reader.onerror = function (error) {
-                self.onerror(ZipFile.ERR_READ + "EOCDR I/O Error " + error);
+                self.onerror(ZipFile.ERR_READ + " EOCDR I/O Error " + error);
             };
 
-            this.openReader(reader, this.file.slice(start));
+            this.openReader(reader, this.file.slice(start, this.size));
         }
 
         private SeekCentral(): void {
@@ -79,10 +79,10 @@ module QZip {
                 }
             };
             reader.onerror = function (error) {
-                self.onerror(ZipFile.ERR_READ + "CDR I/O Error " + error);
+                self.onerror(ZipFile.ERR_READ + " CDR I/O Error " + error);
             };
 
-            this.openReader(reader, this.file.slice(start));
+            this.openReader(reader, this.file.slice(start, this.size));
         }
 
         //Try to find EOCDR in the buffer. Return false if not found
@@ -248,7 +248,7 @@ module QZip {
 
         //Print log if debug flag is true
         static writeLog(msg: string): void {
-            if (!ZipFile.DEBUG) return;
+            if (!ZipFile.DEBUG || typeof (console) === "undefined") return;
             console.log(msg);
         }
     }

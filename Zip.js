@@ -130,10 +130,10 @@ var QZip;
              * @return {BinaryReader} the reader instance.
              */
             BinaryReader.CreateReader = function (data, offset) {
-                if (data instanceof ArrayBuffer) {
+                if (typeof (ArrayBuffer) === "function" && data instanceof ArrayBuffer) {
                     return new Internal.Uint8ArrayReader(new Uint8Array(data), offset);
                 }
-                throw new Error("Unsupported binary reader type.");
+                throw new Error("Unsupported binary reader data type: " + typeof (data));
             };
             BinaryReader.MAX_VALUE_32BITS = 0xFFFFFFFF;
             return BinaryReader;
@@ -428,9 +428,9 @@ var QZip;
                 }
             };
             reader.onerror = function (error) {
-                self.onerror(ZipFile.ERR_READ + "EOCDR I/O Error " + error);
+                self.onerror(ZipFile.ERR_READ + " EOCDR I/O Error " + error);
             };
-            this.openReader(reader, this.file.slice(start));
+            this.openReader(reader, this.file.slice(start, this.size));
         };
         ZipFile.prototype.SeekCentral = function () {
             var reader = this.createReader();
@@ -448,9 +448,9 @@ var QZip;
                 }
             };
             reader.onerror = function (error) {
-                self.onerror(ZipFile.ERR_READ + "CDR I/O Error " + error);
+                self.onerror(ZipFile.ERR_READ + " CDR I/O Error " + error);
             };
-            this.openReader(reader, this.file.slice(start));
+            this.openReader(reader, this.file.slice(start, this.size));
         };
         //Try to find EOCDR in the buffer. Return false if not found
         ZipFile.prototype.CheckEndOfCentral = function (array, start) {
@@ -585,7 +585,7 @@ var QZip;
         };
         //Print log if debug flag is true
         ZipFile.writeLog = function (msg) {
-            if (!ZipFile.DEBUG)
+            if (!ZipFile.DEBUG || typeof (console) === "undefined")
                 return;
             console.log(msg);
         };
