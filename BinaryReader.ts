@@ -111,7 +111,14 @@ module QZip {
              * @return {number} the corresponding number.
              */
             readInt(size: number): number {
-                throw new Error("readInt is not implemented.");
+                var result = 0,
+                    i;
+                this.checkOffset(size);
+                for (i = this.index + size - 1; i >= this.index; i--) {
+                    result = (result << 8) + this.byteAt(i);
+                }
+                this.index += size;
+                return result >>> 0;    //convert signed int to unsigned
             }
 
             readInt64(): number {
@@ -146,7 +153,16 @@ module QZip {
                     (dostime & 0x1f) << 1); // second
             }
 
-            constructor() { }
+            /**
+             * This constructor should be only called in child classes
+             *   Initialize index and offset of binary reader
+             */
+            constructor(length: number, offset?: number) {
+                this.index = 0;
+                this.length = length;
+                if (offset && offset > 0) this.offset = offset;
+                else this.offset = 0;
+            }
 
             dispose(): void { }
 

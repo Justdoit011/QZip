@@ -20,22 +20,6 @@ module QZip {
             }
 
             /**
-             * Get the next number with a given byte size.
-             * @param {number} size the number of bytes to read.
-             * @return {number} the corresponding number.
-             */
-            readInt(size: number): number {
-                var result = 0,
-                    i;
-                this.checkOffset(size);
-                for (i = this.index + size - 1; i >= this.index; i--) {
-                    result = (result << 8) + this.byteAt(i);
-                }
-                this.index += size;
-                return result >>> 0;    //convert signed int to unsigned
-            }
-
-            /**
              * Get the next string with a given byte size.
              * @param {number} size the number of bytes to read.
              * @return {string} the corresponding string.
@@ -103,13 +87,9 @@ module QZip {
             }
 
             constructor(data: Uint8Array, offset?: number) {
-                super();
                 if (!data) throw new Error("Array buffer is empty.");
-                this.index = 0;
-                this.length = data.length;
                 this.data = data;
-                if (offset && offset > 0) this.offset = offset;
-                else this.offset = 0;
+                super(data.length, offset);
             }
         }
     }
