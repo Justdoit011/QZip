@@ -155,11 +155,11 @@ module QZip {
              * @return {BinaryReader} the reader instance.
              */
             static CreateReader(data: any, offset: number) {
-                if (data instanceof ArrayBuffer) {
+                if (typeof (ArrayBuffer) === "function" && data instanceof ArrayBuffer) {
                     return new Uint8ArrayReader(new Uint8Array(data), offset);
                 }
 
-                throw new Error("Unsupported binary reader type.");
+                throw new Error("Unsupported binary reader data type: " + typeof (data));
             }
         }
     }
