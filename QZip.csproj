@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="BinaryReader.ts" />
+    <TypeScriptCompile Include="StringArrayReader.ts" />
     <TypeScriptCompile Include="Uint8ArrayReader.ts" />
     <TypeScriptCompile Include="ZipEntry.ts" />
     <TypeScriptCompile Include="ZipFile.ts" />
