@@ -213,6 +213,7 @@ module QZip {
          */
         private createReader(): any {
             if (typeof (FileReader) === "function") return new FileReader();
+            if (typeof (mOxie) === "object" && typeof (mOxie.FileReader === "function")) return new mOxie.FileReader();
             else throw new Error("Your browser does not have FileReader.");
         }
 
@@ -223,6 +224,9 @@ module QZip {
             if (typeof (reader.readAsArrayBuffer) === "function") {
                 if (typeof (file.getSource) === "function") file = file.getSource();    //convert moxie file to original html5 file
                 reader.readAsArrayBuffer(file);
+            }
+            else if (typeof (reader.readAsBinaryString) === "function") {
+                reader.readAsBinaryString(file);
             }
             else throw new Error("Your browser does not support reading binary file.");
         }
@@ -253,3 +257,6 @@ module QZip {
         }
     }
 }
+
+//Optional 3rd party module to compatible with old browser
+declare var mOxie;

@@ -156,6 +156,8 @@ module QZip {
             /**
              * This constructor should be only called in child classes
              *   Initialize index and offset of binary reader
+             * @param {length} how many bytes of the data buffer
+             * @param {offset} global offset, at which byte on original file this data array started
              */
             constructor(length: number, offset?: number) {
                 this.index = 0;
@@ -170,9 +172,12 @@ module QZip {
              * Create proper binary reader instance based on data type
              * @return {BinaryReader} the reader instance.
              */
-            static CreateReader(data: any, offset: number) {
+            static CreateReader(data: any, offset: number): BinaryReader {
                 if (typeof (ArrayBuffer) === "function" && data instanceof ArrayBuffer) {
                     return new Uint8ArrayReader(new Uint8Array(data), offset);
+                }
+                else if (typeof (data) === "string") {
+                    return new StringArrayReader(data, offset);
                 }
 
                 throw new Error("Unsupported binary reader data type: " + typeof (data));

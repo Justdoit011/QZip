@@ -2,7 +2,7 @@
 module QZip {
 
     export module Internal {
-        /* Binary Reader: read Uint8Array with a cursor
+        /* Uint8 Array Reader: read Uint8Array with a cursor
          * Port from JSZip https://github.com/Stuk/jszip
          * lib/dataReader.js, lib/uint8ArrayReader.js
          * MIT license or the GPLv3
@@ -86,6 +86,11 @@ module QZip {
                 if (this.data) this.data = null;
             }
 
+            /**
+             * Initialize an Uint8Array reader. HTML5 only
+             * @param {data} data array that contains bytes.
+             * @param {offset} global offset, at which byte on original file this data array started
+             */
             constructor(data: Uint8Array, offset?: number) {
                 if (!data) throw new Error("Array buffer is empty.");
                 this.data = data;
