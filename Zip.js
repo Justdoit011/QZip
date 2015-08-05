@@ -204,6 +204,10 @@ var QZip;
 (function (QZip) {
     var Internal;
     (function (Internal) {
+        /* ZipEntry: parse and read a entry from zip file
+         * Dependence: BinaryReader
+         *
+         */
         var ZipEntry = (function () {
             function ZipEntry(reader, zip64) {
                 this.zip64 = false;
@@ -319,6 +323,9 @@ var QZip;
 /// <reference path="ZipEntry.ts" />
 var QZip;
 (function (QZip) {
+    /* ZipFile class: the only external class, main entrance of QZip
+     *   parse and read zip file
+     */
     var ZipFile = (function () {
         function ZipFile(file, onload, onerror) {
             this.zip64 = false;
@@ -393,7 +400,6 @@ var QZip;
                 return false;
             //EOCDR found, try to parse it
             ZipFile.writeLog("EOCDR found: " + offset);
-            this.buffer = array;
             this.reader.setIndex(offset);
             this.checkSignature(ZipFile.CENTRAL_DIRECTORY_END);
             this.readBlockEndOfCentral();
@@ -474,9 +480,6 @@ var QZip;
         ZipFile.prototype.readCentralDir = function (array, start) {
             if (this.reader)
                 this.reader.dispose();
-            if (this.buffer)
-                this.buffer = null;
-            this.buffer = array;
             this.reader = new QZip.Internal.BinaryReader(new Uint8Array(array), start);
             ZipFile.writeLog("Read central dir.");
             while (this.reader.readString(4) === ZipFile.CENTRAL_FILE_HEADER) {

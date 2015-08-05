@@ -22,7 +22,6 @@ module QZip {
 
         //private variables
         private file: File;             //zip file reference
-        private buffer: ArrayBuffer;    //array buffer from zip file
         private reader: Internal.BinaryReader;   //binary reader based on buffer
 
         //public variables
@@ -94,7 +93,6 @@ module QZip {
 
             //EOCDR found, try to parse it
             ZipFile.writeLog("EOCDR found: " + offset);
-            this.buffer = array;
             this.reader.setIndex(offset);
             this.checkSignature(ZipFile.CENTRAL_DIRECTORY_END);
             this.readBlockEndOfCentral();
@@ -186,8 +184,6 @@ module QZip {
          */
         private readCentralDir(array: ArrayBuffer, start: number): void {
             if (this.reader) this.reader.dispose();
-            if (this.buffer) this.buffer = null;
-            this.buffer = array;
             this.reader = new Internal.BinaryReader(new Uint8Array(array), start);
 
             ZipFile.writeLog("Read central dir.");
