@@ -26,11 +26,11 @@
     <Content Include="TestCase.js" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="BinaryReader.ts" />
-    <TypeScriptCompile Include="StringArrayReader.ts" />
-    <TypeScriptCompile Include="Uint8ArrayReader.ts" />
-    <TypeScriptCompile Include="ZipEntry.ts" />
-    <TypeScriptCompile Include="ZipFile.ts" />
+    <TypeScriptCompile Include="src\BinaryReader.ts" />
+    <TypeScriptCompile Include="src\StringArrayReader.ts" />
+    <TypeScriptCompile Include="src\Uint8ArrayReader.ts" />
+    <TypeScriptCompile Include="src\ZipEntry.ts" />
+    <TypeScriptCompile Include="src\ZipFile.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="README.md" />

@@ -65,8 +65,8 @@
 # Ignore related files when creating release packages
 bower.json export-ignore
 TestCase.js export-ignore
+src/ export-ignore
 .* export-ignore
 *.html export-ignore
-*.ts export-ignore
 *.csproj export-ignore
 *.sln export-ignore
