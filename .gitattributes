@@ -61,3 +61,10 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# Ignore related files when creating release packages
+bower.json export-ignore
+*.html export-ignore
+*.ts export-ignore
+*.csproj export-ignore
+*.sln export-ignore
