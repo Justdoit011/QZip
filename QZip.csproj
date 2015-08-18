@@ -24,7 +24,6 @@
   <ItemGroup>
     <Content Include="index.html" />
     <Content Include="TestCase.js" />
-    <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="BinaryReader.ts" />
@@ -34,12 +33,10 @@
     <TypeScriptCompile Include="ZipFile.ts" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="web.Debug.config">
-      <DependentUpon>web.config</DependentUpon>
-    </None>
-    <None Include="web.Release.config">
-      <DependentUpon>web.config</DependentUpon>
-    </None>
+    <Content Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bower.json" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

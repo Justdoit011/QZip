@@ -1,0 +1,26 @@
+{
+  "name": "QZip",
+  "version": "1.0.0",
+  "homepage": "https://github.com/Justdoit011/QZip",
+  "authors": [
+    "Qi Zhao <justdoit11@gmail.com>"
+  ],
+  "description": "A lightweighted JavaScript util to list all entries in a Zip file.",
+  "main": "Zip.js",
+  "moduleType": [
+    "es6"
+  ],
+  "keywords": [
+    "read",
+    "zip",
+    "zip64"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
