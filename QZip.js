@@ -461,6 +461,7 @@ var QZip;
                 this.file = file;
                 this.name = file.name;
                 this.size = file.size;
+                this.uncompressedSize = 0;
                 this.onload = onload;
                 ZipFile.writeLog("Begin reading zip file: " + this.name);
                 this.SeekEndOfCentral();
@@ -604,8 +605,10 @@ var QZip;
             ZipFile.writeLog("Read central dir.");
             while (this.reader.readString(4) === ZipFile.CENTRAL_FILE_HEADER) {
                 var file = new QZip.Internal.ZipEntry(this.reader, this.zip64);
-                if (!file.isDir)
-                    this.files.push(file);
+                if (file.isDir)
+                    continue;
+                this.uncompressedSize += file.uncompressedSize;
+                this.files.push(file);
             }
             if (typeof (this.onload) != "function")
                 return;

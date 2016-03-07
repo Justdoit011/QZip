@@ -46,6 +46,31 @@ declare module QZip {
     interface ZipFile {
 
         /**
+         * Whether this zip file is zip64
+         */
+        zip64: boolean;
+
+        /**
+         * Zip file name
+         */
+        name: string;
+
+        /**
+         * Zip file compressed size
+         */
+        size: number;
+
+        /**
+         * Zip file uncompressed size
+         */
+        uncompressedSize: number;
+
+        /**
+         * File entries in this zip file
+         */
+        files: Array<ZipEntry>;
+
+        /**
          * Create a zip file instance and bind onload and onerror events
          */
         new (file: any, onload: (entries: Array<ZipEntry>) => void, onerror: (msg: string) => void): ZipFile;
