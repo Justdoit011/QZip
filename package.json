@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "qzip",
+  "private": false,
+  "license": "MIT",
+  "author": "Qi Zhao",
+  "repository": "https://github.com/Zhao-Qi/QZip",
+  "description": "A lightweighted JavaScript util to list all entries in a Zip file.",
+  "files": ["QZip.js", "QZip.min.js", "QZip.d.ts", "README.md"],
+  "devDependencies": {
+  }
+}
