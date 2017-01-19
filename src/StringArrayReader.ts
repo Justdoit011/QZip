@@ -41,8 +41,8 @@ module QZip {
              */
             constructor(data: string, offset?: number) {
                 if (!data) throw new Error("Array buffer is empty.");
-                this.data = data;
                 super(data.length, offset);
+                this.data = data;
             }
         }
     }

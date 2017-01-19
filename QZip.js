@@ -161,9 +161,9 @@ var QZip;
                 }
                 throw new Error("Unsupported binary reader data type: " + typeof (data));
             };
-            BinaryReader.MAX_VALUE_32BITS = 0xFFFFFFFF;
             return BinaryReader;
-        })();
+        }());
+        BinaryReader.MAX_VALUE_32BITS = 0xFFFFFFFF;
         Internal.BinaryReader = BinaryReader;
     })(Internal = QZip.Internal || (QZip.Internal = {}));
 })(QZip || (QZip = {}));
@@ -188,10 +188,12 @@ var QZip;
              * @param {offset} global offset, at which byte on original file this data array started
              */
             function StringArrayReader(data, offset) {
+                var _this;
                 if (!data)
                     throw new Error("Array buffer is empty.");
-                this.data = data;
-                _super.call(this, data.length, offset);
+                _this = _super.call(this, data.length, offset) || this;
+                _this.data = data;
+                return _this;
             }
             /**
              * Get the byte at the specified index.
@@ -218,7 +220,7 @@ var QZip;
                     this.data = null;
             };
             return StringArrayReader;
-        })(Internal.BinaryReader);
+        }(Internal.BinaryReader));
         Internal.StringArrayReader = StringArrayReader;
     })(Internal = QZip.Internal || (QZip.Internal = {}));
 })(QZip || (QZip = {}));
@@ -240,10 +242,12 @@ var QZip;
              * @param {offset} global offset, at which byte on original file this data array started
              */
             function Uint8ArrayReader(data, offset) {
+                var _this;
                 if (!data)
                     throw new Error("Array buffer is empty.");
-                this.data = data;
-                _super.call(this, data.length, offset);
+                _this = _super.call(this, data.length, offset) || this;
+                _this.data = data;
+                return _this;
             }
             /**
              * Get the byte at the specified index.
@@ -315,7 +319,7 @@ var QZip;
                     this.data = null;
             };
             return Uint8ArrayReader;
-        })(Internal.BinaryReader);
+        }(Internal.BinaryReader));
         Internal.Uint8ArrayReader = Uint8ArrayReader;
     })(Internal = QZip.Internal || (QZip.Internal = {}));
 })(QZip || (QZip = {}));
@@ -436,7 +440,7 @@ var QZip;
                 return out;
             };
             return ZipEntry;
-        })();
+        }());
         Internal.ZipEntry = ZipEntry;
     })(Internal = QZip.Internal || (QZip.Internal = {}));
 })(QZip || (QZip = {}));
@@ -657,19 +661,19 @@ var QZip;
                 return;
             console.log(msg);
         };
-        ZipFile.EOCDR_MIN = 22; //22 Byte
-        ZipFile.EOCDR_MAX = 65558; //64 KB comment max + 22 B EOCDR
-        ZipFile.EOCDR_BUF = 66560; //65 KB as buffer, which can cover all EOCDR records including zip64
-        ZipFile.CDR_MAX = 0xFFFFFFF; //256 MB is the max size limit of central directory
-        ZipFile.ERR_BAD_FORMAT = "Zip file format is not recognized. ";
-        ZipFile.ERR_READ = "Error while reading zip file. ";
-        ZipFile.DEBUG = true;
-        //signatures
-        ZipFile.CENTRAL_FILE_HEADER = "PK\x01\x02";
-        ZipFile.CENTRAL_DIRECTORY_END = "PK\x05\x06";
-        ZipFile.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x06\x07";
-        ZipFile.ZIP64_CENTRAL_DIRECTORY_END = "PK\x06\x06";
         return ZipFile;
-    })();
+    }());
+    ZipFile.EOCDR_MIN = 22; //22 Byte
+    ZipFile.EOCDR_MAX = 65558; //64 KB comment max + 22 B EOCDR
+    ZipFile.EOCDR_BUF = 66560; //65 KB as buffer, which can cover all EOCDR records including zip64
+    ZipFile.CDR_MAX = 0xFFFFFFF; //256 MB is the max size limit of central directory
+    ZipFile.ERR_BAD_FORMAT = "Zip file format is not recognized. ";
+    ZipFile.ERR_READ = "Error while reading zip file. ";
+    ZipFile.DEBUG = true;
+    //signatures
+    ZipFile.CENTRAL_FILE_HEADER = "PK\x01\x02";
+    ZipFile.CENTRAL_DIRECTORY_END = "PK\x05\x06";
+    ZipFile.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x06\x07";
+    ZipFile.ZIP64_CENTRAL_DIRECTORY_END = "PK\x06\x06";
     QZip.ZipFile = ZipFile;
 })(QZip || (QZip = {}));
