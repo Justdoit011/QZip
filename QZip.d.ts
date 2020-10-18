@@ -139,7 +139,7 @@ declare module QZip {
              * @param {upperLimit} upper bound index of this array. <
              * @return {String} the result.
              */
-            private arrayLikeToString(array, lowerLimit, upperLimit);
+            private arrayLikeToString;
             dispose(): void;
             /**
              * Initialize an Uint8Array reader. HTML5 only
@@ -164,25 +164,25 @@ declare module QZip {
              * Parse the ZIP64 extra field and merge the info in the current ZipEntry.
              * @param {DataReader} reader the reader to use.
              */
-            private parseZIP64ExtraField(reader, extraFieldsLength);
+            private parseZIP64ExtraField;
             /**
              * say if the file is encrypted.
              * @return {boolean} true if the file is encrypted, false otherwise.
              */
-            private isEncrypted();
+            private isEncrypted;
             /**
              * say if the file has utf-8 filename/comment.
              * @return {boolean} true if the filename/comment is in utf-8, false otherwise.
              */
-            private useUTF8();
+            private useUTF8;
             constructor(reader: BinaryReader, zip64: boolean);
             /*******************************************************************************************
              * Ref: http://ecmanaut.blogspot.com/2006/07/encoding-decoding-utf8-in-javascript.html
              *      http://monsur.hossa.in/2012/07/20/utf-8-in-javascript.html
              * originally in zip.js
              *******************************************************************************************/
-            private decodeUTF8(str);
-            private decodeASCII(str);
+            private decodeUTF8;
+            private decodeASCII;
         }
     }
 }
@@ -209,42 +209,42 @@ declare module QZip {
         files: Array<Internal.ZipEntry>;
         onload: Function;
         onerror: Function;
-        private SeekEndOfCentral();
-        private SeekCentral();
-        private CheckEndOfCentral(array, start);
+        private SeekEndOfCentral;
+        private SeekCentral;
+        private CheckEndOfCentral;
         /**
          * Read the end of the central directory.
          */
-        private readBlockEndOfCentral();
+        private readBlockEndOfCentral;
         /**
          * Read the end of the Zip 64 central directory.
          * Not merged with the method readEndOfCentral :
          * The end of central can coexist with its Zip64 brother,
          * I don't want to read the wrong number of bytes !
          */
-        private readBlockZip64EndOfCentral();
+        private readBlockZip64EndOfCentral;
         /**
          * Read the end of the Zip 64 central directory locator.
          */
-        private readBlockZip64EndOfCentralLocator();
+        private readBlockZip64EndOfCentralLocator;
         /**
          * Read the central directory.
          */
-        private readCentralDir(array, start);
+        private readCentralDir;
         /**
          * Check that the reader is on the speficied signature.
          * @param {string} expectedSignature the expected signature.
          * @throws {Error} if it is an other signature.
          */
-        private checkSignature(expectedSignature);
+        private checkSignature;
         /**
          * Create file reader based on browser capacity
          */
-        private createReader();
+        private createReader;
         /**
          * Open file reader based on browser capacity
          */
-        private openReader(reader, file);
+        private openReader;
         constructor(file: File, onload: Function, onerror: Function);
         static writeLog(msg: string): void;
     }

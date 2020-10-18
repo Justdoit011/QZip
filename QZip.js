@@ -20,7 +20,7 @@ var QZip;
          * base class, cannot be initialized directly
          * usage: var reader = Internal.BinaryReader.CreateReader(array, offset);
          */
-        var BinaryReader = (function () {
+        var BinaryReader = /** @class */ (function () {
             /**
              * This constructor should be only called in child classes
              *   Initialize index and offset of binary reader
@@ -161,17 +161,25 @@ var QZip;
                 }
                 throw new Error("Unsupported binary reader data type: " + typeof (data));
             };
+            BinaryReader.MAX_VALUE_32BITS = 0xFFFFFFFF;
             return BinaryReader;
         }());
-        BinaryReader.MAX_VALUE_32BITS = 0xFFFFFFFF;
         Internal.BinaryReader = BinaryReader;
     })(Internal = QZip.Internal || (QZip.Internal = {}));
 })(QZip || (QZip = {}));
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 /// <reference path="BinaryReader.ts" />
 var QZip;
 (function (QZip) {
@@ -180,7 +188,7 @@ var QZip;
         /* String Array Reader: read a string array with a cursor
          *   Each char of the string is considered as a byte
          */
-        var StringArrayReader = (function (_super) {
+        var StringArrayReader = /** @class */ (function (_super) {
             __extends(StringArrayReader, _super);
             /**
              * Initialize a String Array Reader
@@ -188,7 +196,7 @@ var QZip;
              * @param {offset} global offset, at which byte on original file this data array started
              */
             function StringArrayReader(data, offset) {
-                var _this;
+                var _this = this;
                 if (!data)
                     throw new Error("Array buffer is empty.");
                 _this = _super.call(this, data.length, offset) || this;
@@ -234,7 +242,7 @@ var QZip;
          * lib/dataReader.js, lib/uint8ArrayReader.js
          * MIT license or the GPLv3
          */
-        var Uint8ArrayReader = (function (_super) {
+        var Uint8ArrayReader = /** @class */ (function (_super) {
             __extends(Uint8ArrayReader, _super);
             /**
              * Initialize an Uint8Array reader. HTML5 only
@@ -242,7 +250,7 @@ var QZip;
              * @param {offset} global offset, at which byte on original file this data array started
              */
             function Uint8ArrayReader(data, offset) {
-                var _this;
+                var _this = this;
                 if (!data)
                     throw new Error("Array buffer is empty.");
                 _this = _super.call(this, data.length, offset) || this;
@@ -265,7 +273,13 @@ var QZip;
             Uint8ArrayReader.prototype.readString = function (size) {
                 if (size === 0)
                     return "";
-                var result = this.arrayLikeToString(this.data, this.index, this.index + size);
+                var result;
+                if (navigator.languages.indexOf("zh-CN") >= 0 && typeof TextDecoder === "function") {
+                    result = new TextDecoder("gbk").decode(this.data.subarray(this.index, this.index + size));
+                }
+                else {
+                    result = this.arrayLikeToString(this.data, this.index, this.index + size);
+                }
                 this.index += size;
                 return result;
             };
@@ -332,7 +346,7 @@ var QZip;
          * Dependence: BinaryReader
          *
          */
-        var ZipEntry = (function () {
+        var ZipEntry = /** @class */ (function () {
             function ZipEntry(reader, zip64) {
                 this.zip64 = false;
                 this.isDir = false;
@@ -431,11 +445,11 @@ var QZip;
                     '\u00DE', '\u00DA', '\u00DB', '\u00D9', '\u00FD', '\u00DD', '\u00AF', '\u00B4', '\u00AD', '\u00B1', '_', '\u00BE', '\u00B6', '\u00A7',
                     '\u00F7', '\u00B8', '\u00B0', '\u00A8', '\u00B7', '\u00B9', '\u00B3', '\u00B2', '_', ' '];
                 for (i = 0; i < str.length; i++) {
-                    charCode = str.charCodeAt(i) & 0xFF;
-                    if (charCode > 127)
+                    charCode = str.charCodeAt(i);
+                    if (charCode > 127 && charCode < 256)
                         out += extendedASCII[charCode - 128];
                     else
-                        out += String.fromCharCode(charCode);
+                        out += str.charAt(i);
                 }
                 return out;
             };
@@ -450,7 +464,7 @@ var QZip;
     /* ZipFile class: the only external class, main entrance of QZip
      *   parse and read zip file
      */
-    var ZipFile = (function () {
+    var ZipFile = /** @class */ (function () {
         function ZipFile(file, onload, onerror) {
             this.zip64 = false;
             this.files = [];
@@ -661,19 +675,19 @@ var QZip;
                 return;
             console.log(msg);
         };
+        ZipFile.EOCDR_MIN = 22; //22 Byte
+        ZipFile.EOCDR_MAX = 65558; //64 KB comment max + 22 B EOCDR
+        ZipFile.EOCDR_BUF = 66560; //65 KB as buffer, which can cover all EOCDR records including zip64
+        ZipFile.CDR_MAX = 0xFFFFFFF; //256 MB is the max size limit of central directory
+        ZipFile.ERR_BAD_FORMAT = "Zip file format is not recognized. ";
+        ZipFile.ERR_READ = "Error while reading zip file. ";
+        ZipFile.DEBUG = true;
+        //signatures
+        ZipFile.CENTRAL_FILE_HEADER = "PK\x01\x02";
+        ZipFile.CENTRAL_DIRECTORY_END = "PK\x05\x06";
+        ZipFile.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x06\x07";
+        ZipFile.ZIP64_CENTRAL_DIRECTORY_END = "PK\x06\x06";
         return ZipFile;
     }());
-    ZipFile.EOCDR_MIN = 22; //22 Byte
-    ZipFile.EOCDR_MAX = 65558; //64 KB comment max + 22 B EOCDR
-    ZipFile.EOCDR_BUF = 66560; //65 KB as buffer, which can cover all EOCDR records including zip64
-    ZipFile.CDR_MAX = 0xFFFFFFF; //256 MB is the max size limit of central directory
-    ZipFile.ERR_BAD_FORMAT = "Zip file format is not recognized. ";
-    ZipFile.ERR_READ = "Error while reading zip file. ";
-    ZipFile.DEBUG = true;
-    //signatures
-    ZipFile.CENTRAL_FILE_HEADER = "PK\x01\x02";
-    ZipFile.CENTRAL_DIRECTORY_END = "PK\x05\x06";
-    ZipFile.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x06\x07";
-    ZipFile.ZIP64_CENTRAL_DIRECTORY_END = "PK\x06\x06";
     QZip.ZipFile = ZipFile;
 })(QZip || (QZip = {}));
