@@ -27,7 +27,13 @@ module QZip {
             readString(size: number): string {
                 if (size === 0) return "";
 
-                var result = this.arrayLikeToString(this.data, this.index, this.index + size);
+                let result: string;
+                if (navigator.languages.indexOf("zh-CN") >= 0 && typeof TextDecoder === "function") {
+                    result = new TextDecoder("gbk").decode(this.data.subarray(this.index, this.index + size));
+                }
+                else {
+                    result = this.arrayLikeToString(this.data, this.index, this.index + size);
+                }
                 this.index += size;
                 return result;
             }

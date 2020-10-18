@@ -121,11 +121,11 @@ module QZip {
                     '\u00DE', '\u00DA', '\u00DB', '\u00D9', '\u00FD', '\u00DD', '\u00AF', '\u00B4', '\u00AD', '\u00B1', '_', '\u00BE', '\u00B6', '\u00A7',
                     '\u00F7', '\u00B8', '\u00B0', '\u00A8', '\u00B7', '\u00B9', '\u00B3', '\u00B2', '_', ' '];
                 for (i = 0; i < str.length; i++) {
-                    charCode = str.charCodeAt(i) & 0xFF;
-                    if (charCode > 127)
+                    charCode = str.charCodeAt(i);
+                    if (charCode > 127 && charCode < 256)
                         out += extendedASCII[charCode - 128];
                     else
-                        out += String.fromCharCode(charCode);
+                        out += str.charAt(i);
                 }
                 return out;
             }
